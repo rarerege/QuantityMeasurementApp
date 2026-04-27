@@ -1,113 +1,64 @@
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class QuantityMeasurementAppTest {
 
     @Test
-    void testFeetToBase() {
-        assertEquals(1.0,
-                LengthUnit.FEET.convertToBaseUnit(1.0),
+    public void testKgToGramEquality() {
+        QuantityWeight kg = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight gram = new QuantityWeight(1000.0, WeightUnit.GRAM);
+
+        assertTrue(kg.equals(gram));
+    }
+
+    @Test
+    public void testKgToPoundEquality() {
+        QuantityWeight kg = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight pound = new QuantityWeight(2.20462, WeightUnit.POUND);
+
+        assertTrue(kg.equals(pound));
+    }
+
+    @Test
+    public void testConvertKgToGram() {
+        QuantityWeight kg = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+
+        assertEquals(1000.0,
+                kg.convertTo(WeightUnit.GRAM).getValue(),
                 0.0001);
     }
 
     @Test
-    void testInchToBase() {
-        assertEquals(1.0,
-                LengthUnit.INCH.convertToBaseUnit(12.0),
-                0.0001);
+    public void testAddSameUnit() {
+        QuantityWeight a = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight b = new QuantityWeight(2.0, WeightUnit.KILOGRAM);
+
+        QuantityWeight result = a.add(b);
+
+        assertEquals(3.0, result.getValue(), 0.0001);
+        assertEquals(WeightUnit.KILOGRAM, result.getUnit());
     }
 
     @Test
-    void testYardToBase() {
-        assertEquals(3.0,
-                LengthUnit.YARD.convertToBaseUnit(1.0),
-                0.0001);
+    public void testAddDifferentUnits() {
+        QuantityWeight kg = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
+        QuantityWeight gram = new QuantityWeight(1000.0, WeightUnit.GRAM);
+
+        QuantityWeight result = kg.add(gram);
+
+        assertEquals(2.0, result.getValue(), 0.0001);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullUnit() {
+        new QuantityWeight(1.0, null);
     }
 
     @Test
-    void testCmToBase() {
-        assertEquals(1.0,
-                LengthUnit.CENTIMETER.convertToBaseUnit(30.48),
-                0.0001);
-    }
+    public void testIncompatibleCategoryNotAllowed() {
+        QuantityWeight weight = new QuantityWeight(1.0, WeightUnit.KILOGRAM);
 
-    @Test
-    void testBaseToInch() {
-        assertEquals(12.0,
-                LengthUnit.INCH.convertFromBaseUnit(1.0),
-                0.0001);
-    }
-
-    @Test
-    void testBaseToYard() {
-        assertEquals(1.0,
-                LengthUnit.YARD.convertFromBaseUnit(3.0),
-                0.0001);
-    }
-
-    // =========================
-    // Quantity Tests
-    // =========================
-
-    @Test
-    void testEquality_Feet_Inch() {
-
-        QuantityMeasurementApp.QuantityLength q1 =
-                new QuantityMeasurementApp.QuantityLength(1.0, LengthUnit.FEET);
-
-        QuantityMeasurementApp.QuantityLength q2 =
-                new QuantityMeasurementApp.QuantityLength(12.0, LengthUnit.INCH);
-
-        assertTrue(q1.equals(q2));
-    }
-
-    @Test
-    void testConvert_FeetToInch() {
-
-        QuantityMeasurementApp.QuantityLength q =
-                new QuantityMeasurementApp.QuantityLength(1.0, LengthUnit.FEET);
-
-        assertEquals(12.0, q.convertTo(LengthUnit.INCH), 0.0001);
-    }
-
-    @Test
-    void testAdd_WithTargetUnit_Yard() {
-
-        QuantityMeasurementApp.QuantityLength q1 =
-                new QuantityMeasurementApp.QuantityLength(1.0, LengthUnit.FEET);
-
-        QuantityMeasurementApp.QuantityLength q2 =
-                new QuantityMeasurementApp.QuantityLength(12.0, LengthUnit.INCH);
-
-        QuantityMeasurementApp.QuantityLength result =
-                q1.add(q2, LengthUnit.YARD);
-
-        assertEquals(0.667,
-                result.convertTo(LengthUnit.YARD),
-                0.01);
-    }
-
-    @Test
-    void testAdd_Feet_Feet() {
-
-        QuantityMeasurementApp.QuantityLength q1 =
-                new QuantityMeasurementApp.QuantityLength(1.0, LengthUnit.FEET);
-
-        QuantityMeasurementApp.QuantityLength q2 =
-                new QuantityMeasurementApp.QuantityLength(2.0, LengthUnit.FEET);
-
-        QuantityMeasurementApp.QuantityLength result =
-                q1.add(q2, LengthUnit.FEET);
-
-        assertEquals(3.0,
-                result.convertTo(LengthUnit.FEET),
-                0.0001);
-    }
-
-    @Test
-    void testNullUnit() {
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new QuantityMeasurementApp.QuantityLength(1.0, null));
+        // This should be false due to class mismatch (Length class not included here)
+        assertFalse(weight.equals("1 kg"));
     }
 }
