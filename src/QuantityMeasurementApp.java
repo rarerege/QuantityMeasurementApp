@@ -1,31 +1,6 @@
 public class QuantityMeasurementApp {
 
     // =========================
-    // UNIT ENUM
-    // =========================
-    enum LengthUnit {
-
-        FEET(1.0),
-        INCH(1.0 / 12.0),
-        YARD(3.0),
-        CENTIMETER(1.0 / 30.48);
-
-        private final double toFeet;
-
-        LengthUnit(double toFeet) {
-            this.toFeet = toFeet;
-        }
-
-        public double toFeet(double value) {
-            return value * toFeet;
-        }
-
-        public double fromFeet(double feetValue) {
-            return feetValue / toFeet;
-        }
-    }
-
-    // =========================
     // VALUE OBJECT
     // =========================
     static class QuantityLength {
@@ -38,6 +13,7 @@ public class QuantityMeasurementApp {
             if (!Double.isFinite(value)) {
                 throw new IllegalArgumentException("Invalid value");
             }
+
             if (unit == null) {
                 throw new IllegalArgumentException("Unit cannot be null");
             }
@@ -47,18 +23,14 @@ public class QuantityMeasurementApp {
         }
 
         // =========================
-        // BASE CONVERSION
+        // CONVERT TO BASE UNIT
         // =========================
         private double toBase() {
-            return unit.toFeet(value);
-        }
-
-        private double fromBase(double base, LengthUnit target) {
-            return target.fromFeet(base);
+            return unit.convertToBaseUnit(value);
         }
 
         // =========================
-        // UC5: CONVERSION
+        // CONVERT TO TARGET UNIT
         // =========================
         public double convertTo(LengthUnit target) {
 
@@ -66,18 +38,12 @@ public class QuantityMeasurementApp {
                 throw new IllegalArgumentException("Target unit cannot be null");
             }
 
-            return fromBase(toBase(), target);
+            double base = toBase();
+            return target.convertFromBaseUnit(base);
         }
 
         // =========================
-        // UC6: ADD (default = first operand unit)
-        // =========================
-        public QuantityLength add(QuantityLength other) {
-            return add(other, this.unit);
-        }
-
-        // =========================
-        // UC7: ADD (explicit target unit)
+        // ADD (UC6 / UC7 supported)
         // =========================
         public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
 
@@ -85,10 +51,18 @@ public class QuantityMeasurementApp {
                 throw new IllegalArgumentException("Invalid input");
             }
 
-            double sumInBase = this.toBase() + other.toBase();
-            double result = fromBase(sumInBase, targetUnit);
+            double sumBase =
+                    this.toBase() + other.toBase();
+
+            double result =
+                    targetUnit.convertFromBaseUnit(sumBase);
 
             return new QuantityLength(result, targetUnit);
+        }
+
+        // UC6 backward compatibility
+        public QuantityLength add(QuantityLength other) {
+            return add(other, this.unit);
         }
 
         @Override
@@ -109,7 +83,7 @@ public class QuantityMeasurementApp {
     }
 
     // =========================
-    // DEMO API
+    // STATIC API
     // =========================
     public static QuantityLength add(
             QuantityLength a,
@@ -130,16 +104,8 @@ public class QuantityMeasurementApp {
         QuantityLength q2 =
                 new QuantityLength(12.0, LengthUnit.INCH);
 
-        System.out.println(
-                add(q1, q2, LengthUnit.FEET)
-        );
-
-        System.out.println(
-                add(q1, q2, LengthUnit.INCH)
-        );
-
-        System.out.println(
-                add(q1, q2, LengthUnit.YARD)
-        );
+        System.out.println(add(q1, q2, LengthUnit.FEET));
+        System.out.println(add(q1, q2, LengthUnit.INCH));
+        System.out.println(add(q1, q2, LengthUnit.YARD));
     }
 }
