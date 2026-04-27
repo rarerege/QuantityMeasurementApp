@@ -3,86 +3,117 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class QuantityMeasurementAppTest {
 
-    // YARD tests
+    // Feet → Inches
     @Test
-    void testEquality_YardToFeet() {
-        assertTrue(QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.YARD,
-                3.0, QuantityMeasurementApp.Unit.FEET));
+    void testConversion_FeetToInches() {
+        assertEquals(12.0,
+                QuantityMeasurementApp.convert(1.0,
+                        QuantityMeasurementApp.LengthUnit.FEET,
+                        QuantityMeasurementApp.LengthUnit.INCH),
+                0.0001);
     }
 
+    // Inches → Feet
     @Test
-    void testEquality_YardToInch() {
-        assertTrue(QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.YARD,
-                36.0, QuantityMeasurementApp.Unit.INCH));
+    void testConversion_InchesToFeet() {
+        assertEquals(2.0,
+                QuantityMeasurementApp.convert(24.0,
+                        QuantityMeasurementApp.LengthUnit.INCH,
+                        QuantityMeasurementApp.LengthUnit.FEET),
+                0.0001);
     }
 
+    // Yards → Inches
     @Test
-    void testEquality_YardToYard_SameValue() {
-        assertTrue(QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.YARD,
-                1.0, QuantityMeasurementApp.Unit.YARD));
+    void testConversion_YardsToInches() {
+        assertEquals(36.0,
+                QuantityMeasurementApp.convert(1.0,
+                        QuantityMeasurementApp.LengthUnit.YARD,
+                        QuantityMeasurementApp.LengthUnit.INCH),
+                0.0001);
     }
 
+    // Inches → Yards
     @Test
-    void testEquality_YardToYard_DifferentValue() {
-        assertFalse(QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.YARD,
-                2.0, QuantityMeasurementApp.Unit.YARD));
+    void testConversion_InchesToYards() {
+        assertEquals(2.0,
+                QuantityMeasurementApp.convert(72.0,
+                        QuantityMeasurementApp.LengthUnit.INCH,
+                        QuantityMeasurementApp.LengthUnit.YARD),
+                0.0001);
     }
 
-    // CM tests
+    // CM → Inches
     @Test
-    void testEquality_CmToInch() {
-        assertTrue(QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.CENTIMETER,
-                0.393701, QuantityMeasurementApp.Unit.INCH));
+    void testConversion_CmToInches() {
+        assertEquals(1.0,
+                QuantityMeasurementApp.convert(2.54,
+                        QuantityMeasurementApp.LengthUnit.CENTIMETER,
+                        QuantityMeasurementApp.LengthUnit.INCH),
+                0.0001);
     }
 
+    // Same unit conversion
     @Test
-    void testEquality_CmToCm_SameValue() {
-        assertTrue(QuantityMeasurementApp.compare(
-                2.0, QuantityMeasurementApp.Unit.CENTIMETER,
-                2.0, QuantityMeasurementApp.Unit.CENTIMETER));
+    void testConversion_SameUnit() {
+        assertEquals(5.0,
+                QuantityMeasurementApp.convert(5.0,
+                        QuantityMeasurementApp.LengthUnit.FEET,
+                        QuantityMeasurementApp.LengthUnit.FEET),
+                0.0001);
     }
 
+    // Zero value
     @Test
-    void testEquality_CmToFeet_NonEquivalent() {
-        assertFalse(QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.CENTIMETER,
-                1.0, QuantityMeasurementApp.Unit.FEET));
+    void testConversion_ZeroValue() {
+        assertEquals(0.0,
+                QuantityMeasurementApp.convert(0.0,
+                        QuantityMeasurementApp.LengthUnit.FEET,
+                        QuantityMeasurementApp.LengthUnit.INCH));
     }
 
-    // Multi-unit transitive test
+    // Negative value
     @Test
-    void testTransitive_YardFeetInch() {
-
-        boolean yardToFeet = QuantityMeasurementApp.compare(
-                1.0, QuantityMeasurementApp.Unit.YARD,
-                3.0, QuantityMeasurementApp.Unit.FEET);
-
-        boolean feetToInch = QuantityMeasurementApp.compare(
-                3.0, QuantityMeasurementApp.Unit.FEET,
-                36.0, QuantityMeasurementApp.Unit.INCH);
-
-        assertTrue(yardToFeet && feetToInch);
+    void testConversion_NegativeValue() {
+        assertEquals(-12.0,
+                QuantityMeasurementApp.convert(-1.0,
+                        QuantityMeasurementApp.LengthUnit.FEET,
+                        QuantityMeasurementApp.LengthUnit.INCH));
     }
 
-    // Safety tests
+    // Round trip test
     @Test
-    void testSameReference() {
-        QuantityMeasurementApp.Quantity q =
-                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.Unit.FEET);
+    void testRoundTripConversion() {
 
-        assertTrue(q.equals(q));
+        double inches = QuantityMeasurementApp.convert(
+                1.0,
+                QuantityMeasurementApp.LengthUnit.FEET,
+                QuantityMeasurementApp.LengthUnit.INCH
+        );
+
+        double feet = QuantityMeasurementApp.convert(
+                inches,
+                QuantityMeasurementApp.LengthUnit.INCH,
+                QuantityMeasurementApp.LengthUnit.FEET
+        );
+
+        assertEquals(1.0, feet, 0.0001);
     }
 
+    // Invalid value test
     @Test
-    void testNullComparison() {
-        QuantityMeasurementApp.Quantity q =
-                new QuantityMeasurementApp.Quantity(1.0, QuantityMeasurementApp.Unit.FEET);
+    void testInvalidValueThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new QuantityMeasurementApp.QuantityLength(Double.NaN,
+                    QuantityMeasurementApp.LengthUnit.FEET);
+        });
+    }
 
-        assertFalse(q.equals(null));
+    // Null unit test
+    @Test
+    void testNullUnitThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new QuantityMeasurementApp.QuantityLength(1.0, null);
+        });
     }
 }
