@@ -1,22 +1,25 @@
 public class QuantityMeasurementApp {
 
-    // Step 1: Enum for units
+    // Step 1: Extended Unit Enum
     enum Unit {
+
         FEET(1.0),
-        INCH(1.0 / 12.0);
+        INCH(1.0 / 12.0),
+        YARD(3.0),
+        CENTIMETER(1.0 / 30.48); // 1 cm = 0.0328084 feet approx
 
-        private final double conversionFactorToFeet;
+        private final double toFeet;
 
-        Unit(double conversionFactorToFeet) {
-            this.conversionFactorToFeet = conversionFactorToFeet;
+        Unit(double toFeet) {
+            this.toFeet = toFeet;
         }
 
-        public double toFeet(double value) {
-            return value * conversionFactorToFeet;
+        public double convertToFeet(double value) {
+            return value * toFeet;
         }
     }
 
-    // Step 2: Generic Quantity class
+    // Step 2: Generic Quantity Class (UNCHANGED from UC3)
     static class Quantity {
 
         private final double value;
@@ -28,7 +31,7 @@ public class QuantityMeasurementApp {
         }
 
         private double getBaseValue() {
-            return unit.toFeet(value);
+            return unit.convertToFeet(value);
         }
 
         @Override
@@ -48,22 +51,24 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // Helper methods (as required in UC flow)
-    public static boolean compare(double value1, Unit unit1, double value2, Unit unit2) {
-        Quantity q1 = new Quantity(value1, unit1);
-        Quantity q2 = new Quantity(value2, unit2);
-        return q1.equals(q2);
+    // Helper method
+    public static boolean compare(double v1, Unit u1, double v2, Unit u2) {
+        return new Quantity(v1, u1).equals(new Quantity(v2, u2));
     }
 
-    // Main method
+    // Main demo
     public static void main(String[] args) {
 
-        System.out.println("Input: 1.0 feet and 12.0 inches");
-        System.out.println("Output: Equal (" +
-                compare(1.0, Unit.FEET, 12.0, Unit.INCH) + ")");
+        System.out.println("1 YARD = 3 FEET → " +
+                compare(1.0, Unit.YARD, 3.0, Unit.FEET));
 
-        System.out.println("Input: 1.0 inch and 1.0 inch");
-        System.out.println("Output: Equal (" +
-                compare(1.0, Unit.INCH, 1.0, Unit.INCH) + ")");
+        System.out.println("1 YARD = 36 INCH → " +
+                compare(1.0, Unit.YARD, 36.0, Unit.INCH));
+
+        System.out.println("1 CM = 0.393701 INCH → " +
+                compare(1.0, Unit.CENTIMETER, 0.393701, Unit.INCH));
+
+        System.out.println("2 YARD = 2 YARD → " +
+                compare(2.0, Unit.YARD, 2.0, Unit.YARD));
     }
 }
